@@ -1,3 +1,6 @@
+## Camunda documentation
+https://unsupported.docs.camunda.io/8.1/docs/self-managed/platform-deployment/helm-kubernetes/platforms/google-gke/
+
 ## Make sure GKE’s PD CSI + SSD class is available
 
 kubectl get sc
