@@ -1,0 +1,139 @@
+# camunda-gke-values.yaml
+
+global:
+  # Pin the platform version that matches your chart (example tag—replace with your target).
+  # See chart repo / docs for the matching appVersion.
+  image:
+    tag: "8.8.0"  # <-- keep connectors images in lockstep with this
+  imagePullPolicy: IfNotPresent
+
+  # Optional: prefer scheduling on your n1-standard-8 nodes
+  nodeSelector:
+    node.kubernetes.io/instance-type: n1-standard-8
+
+  # If you use a cluster-wide default StorageClass, you can omit these.
+  storageClass: "premium-rwo"
+
+zeebe:
+  broker:
+    replicas: 3
+    partitionCount: 3
+    replicationFactor: 3
+    resources:
+      requests:
+        cpu: "4"
+        memory: "8Gi"
+      limits:
+        cpu: "8"
+        memory: "16Gi"
+    persistence:
+      enabled: true
+      size: 200Gi
+      storageClassName: "premium-rwo"
+  gateway:
+    replicas: 2
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "2"
+        memory: "2Gi"
+
+operate:
+  enabled: true
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2"
+      memory: "2Gi"
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClassName: "premium-rwo"
+
+tasklist:
+  enabled: true
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2"
+      memory: "2Gi"
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClassName: "premium-rwo"
+
+identity:
+  enabled: true
+  # Optional extra logging when debugging startup issues
+  env:
+    - name: LOGGING_LEVEL_ROOT
+      value: "INFO"
+
+connectors:
+  enabled: true
+  # Keep these images aligned with global.image.tag / platform version.
+  # If you pull a specific Connectors bundle image, pin it here.
+  image:
+    tag: "8.8.0"
+  # Make both runtimes available; disable the one you don't need later.
+  inbound:
+    enabled: true
+    replicas: 1
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1"
+        memory: "1Gi"
+    # If you use custom connectors, mount them under /opt/custom per docs.
+    # volumeMounts / volumes can be added here.
+  outbound:
+    enabled: true
+    replicas: 1
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1"
+        memory: "1Gi"
+  # Helpful health/readiness tuning for slower pulls or first boot
+  startupProbe:
+    failureThreshold: 60
+    periodSeconds: 5
+  livenessProbe:
+    initialDelaySeconds: 60
+  readinessProbe:
+    initialDelaySeconds: 30
+
+# If you don't have a managed Elastic/OpenSearch, you can run the bundled one.
+# Production guidance prefers managed services when possible.
+elasticsearch:
+  enabled: true
+  master:
+    persistence:
+      enabled: true
+      size: 50Gi
+      # Chart sometimes uses 'storageClass' key; keep both to be safe.
+      storageClass: "premium-rwo"
+      storageClassName: "premium-rwo"
+  data:
+    replicas: 2
+    persistence:
+      enabled: true
+      size: 200Gi
+      storageClass: "premium-rwo"
+      storageClassName: "premium-rwo"
+
+# Ingress sample (adjust to your controller/DNS)
+ingress:
+  enabled: false
+  # className: "gce"
+  # hosts: ["camunda.yourdomain.com"]
