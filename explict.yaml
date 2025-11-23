@@ -1,0 +1,18 @@
+zeebe:
+  broker:
+    persistence:
+      enabled: true
+      size: 200Gi
+      storageClassName: premium-rwo
+
+elasticsearch:
+  master:
+    persistence:
+      enabled: true
+      size: 50Gi
+      storageClassName: premium-rwo
+  data:
+    persistence:
+      enabled: true
+      size: 200Gi
+      storageClassName: premium-rwo
