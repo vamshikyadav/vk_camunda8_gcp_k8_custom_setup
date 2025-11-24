@@ -16,3 +16,4 @@ elasticsearch:
       enabled: true
       size: 200Gi
       storageClassName: premium-rwo
+Dollar$123

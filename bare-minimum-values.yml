@@ -1,0 +1,36 @@
+global:
+  # If you want to pin to a node type, set it to whatever you actually have (n4-standard-8 etc.)
+  nodeSelector:
+    node.kubernetes.io/instance-type: n4-standard-8   # or remove this line for now
+
+# --- Core engine: Zeebe ---
+zeebe:
+  broker:
+    replicas: 1
+    persistence:
+      enabled: false          # <--- no PVC, uses emptyDir
+    exporters:
+      elasticsearch:
+        enabled: false        # <--- don't try to talk to ES
+  gateway:
+    replicas: 1
+
+# --- Disable everything that needs Elasticsearch ---
+elasticsearch:
+  enabled: false
+
+operate:
+  enabled: false
+
+tasklist:
+  enabled: false
+
+optimize:
+  enabled: false
+
+# Optional: keep Identity/Keycloak + Connectors running, or disable them too if you want it super minimal
+identity:
+  enabled: false
+
+connectors:
+  enabled: false
