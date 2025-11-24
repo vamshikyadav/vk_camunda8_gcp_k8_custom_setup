@@ -1,0 +1,32 @@
+global:
+  nodeSelector:
+    node.kubernetes.io/instance-type: n4-standard-8   # or drop this if not needed
+
+zeebe:
+  broker:
+    replicas: 1
+    persistence:
+      enabled: false
+    exporters:
+      elasticsearch:
+        enabled: true       # UI needs this
+  gateway:
+    replicas: 1
+
+elasticsearch:
+  enabled: true
+  master:
+    persistence:
+      enabled: false
+  data:
+    persistence:
+      enabled: false
+
+operate:
+  enabled: true
+
+tasklist:
+  enabled: true
+
+identity:
+  enabled: false      # or true if you want SSO / Identity as well

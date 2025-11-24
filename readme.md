@@ -28,3 +28,11 @@ kubectl -n camunda logs deploy/camunda-connectors-... --tail=200
 ## SSD PVCs don’t bind
 kubectl get sc
 kubectl -n camunda get pvc
+
+## want a UI but still avoid all the disk / SSD issues, we can do a “UI but no PVCs” dev setup:
+
+Zeebe broker + gateway
+Elasticsearch in-memory (no persistence / no PD)
+Operate + Tasklist enabled
+All persistence disabled → no PV / PD attach errors
+Checkout --> bare-minimum-with-ui.yml
