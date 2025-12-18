@@ -35,12 +35,10 @@ spec:
           # Use the latest image per Cloud SQL docs; keep this updated
           image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.10.0
           args:
-            # Format: <PROJECT-ID>:<REGION>:<INSTANCE-NAME>
-            - "--address=0.0.0.0"
-            - "--port=5432"
-            - "--log_debug_stdout"
-            - "--auto-iam-authn"
-            - "YOUR-PROJECT-ID:YOUR-REGION:YOUR-INSTANCE-NAME"
+            # Connect to your private IP Cloud SQL instance on port 5432
+            - "-instances=YOUR-PROJECT-ID:YOUR-REGION:YOUR-INSTANCE-NAME=tcp:0.0.0.0:5432"
+            # Force private IP usage
+            - "-ip_address_types=PRIVATE"
           ports:
             - name: postgres
               containerPort: 5432
