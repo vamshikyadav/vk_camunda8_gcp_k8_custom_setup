@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: db-tools
+  labels:
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloud-sql-proxy-sa
+  namespace: db-tools
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-proxy
+  namespace: db-tools
+  labels:
+    app: postgres-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-proxy
+  template:
+    metadata:
+      labels:
+        app: postgres-proxy
+    spec:
+      serviceAccountName: cloud-sql-proxy-sa
+      # If you're using Workload Identity, you also need the GSA ↔ KSA binding at IAM level.
+      containers:
+        - name: cloud-sql-proxy
+          # Use the latest image per Cloud SQL docs; keep this updated
+          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.10.0
+          args:
+            # Format: <PROJECT-ID>:<REGION>:<INSTANCE-NAME>
+            - "--address=0.0.0.0"
+            - "--port=5432"
+            - "--log_debug_stdout"
+            - "--auto-iam-authn"
+            - "YOUR-PROJECT-ID:YOUR-REGION:YOUR-INSTANCE-NAME"
+          ports:
+            - name: postgres
+              containerPort: 5432
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-proxy
+  namespace: db-tools
+  labels:
+    app: postgres-proxy
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres-proxy
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+      protocol: TCP
