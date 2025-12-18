@@ -87,3 +87,19 @@ spec:
             host: postgres-proxy.db-tools.svc.cluster.local
             port:
               number: 5432
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: postgres-gateway
+  namespace: db-tools
+spec:
+  selector:
+    istio: ingressgateway   # Change if your ingress GW label differs
+  servers:
+    - port:
+        number: 5432
+        name: tcp-postgres
+        protocol: TCP
+      hosts:
+        - "*"
