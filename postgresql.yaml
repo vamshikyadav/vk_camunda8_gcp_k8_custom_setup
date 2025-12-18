@@ -68,3 +68,22 @@ spec:
       port: 5432
       targetPort: 5432
       protocol: TCP
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: postgres-vs
+  namespace: db-tools
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - postgres-gateway
+  tcp:
+    - match:
+        - port: 5432
+      route:
+        - destination:
+            host: postgres-proxy.db-tools.svc.cluster.local
+            port:
+              number: 5432
