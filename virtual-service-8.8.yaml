@@ -15,7 +15,7 @@ spec:
             prefix: /operate
       route:
         - destination:
-            host: camunda-platform-icsaas-alpha-us-zeebe-gateway.camunda.svc.cluster.local
+            host: camunda-platform-icsaas-dev-us-zeebe-gateway.camunda.svc.cluster.local
             port:
               number: 8080
 
@@ -25,7 +25,7 @@ spec:
             prefix: /tasklist
       route:
         - destination:
-            host: camunda-platform-icsaas-alpha-us-zeebe-gateway.camunda.svc.cluster.local
+            host: camunda-platform-icsaas-dev-us-zeebe-gateway.camunda.svc.cluster.local
             port:
               number: 8080
 
@@ -35,7 +35,7 @@ spec:
             prefix: /v2
       route:
         - destination:
-            host: camunda-platform-icsaas-alpha-us-zeebe-gateway.camunda.svc.cluster.local
+            host: camunda-platform-icsaas-dev-us-zeebe-gateway.camunda.svc.cluster.local
             port:
               number: 8080
 
@@ -51,6 +51,6 @@ spec:
         - port: 26500
       route:
         - destination:
-            host: camunda-platform-icsaas-alpha-us-zeebe-gateway.camunda.svc.cluster.local
+            host: camunda-platform-icsaas-dev-us-zeebe-gateway.camunda.svc.cluster.local
             port:
               number: 26500
