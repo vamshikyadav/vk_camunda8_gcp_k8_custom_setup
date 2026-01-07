@@ -41,3 +41,6 @@ Checkout --> bare-minimum-with-ui.yml
 
 http://camunda.example.com/operate
 http://camunda.example.com/tasklist
+
+
+ZEEBE_ADDRESS=camunda.example.com:26500 for workers
