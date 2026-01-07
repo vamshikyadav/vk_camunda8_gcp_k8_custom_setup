@@ -36,3 +36,8 @@ Elasticsearch in-memory (no persistence / no PD)
 Operate + Tasklist enabled
 All persistence disabled → no PV / PD attach errors
 Checkout --> bare-minimum-with-ui.yml
+
+## Access UI 
+
+http://camunda.example.com/operate
+http://camunda.example.com/tasklist

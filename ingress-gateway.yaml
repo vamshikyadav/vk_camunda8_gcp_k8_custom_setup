@@ -1,0 +1,24 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: camunda-gateway
+  namespace: camunda
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    # HTTP for Operate & Tasklist
+    - port:
+        name: http
+        protocol: HTTP
+        number: 80
+      hosts:
+        - camunda.example.com
+
+    # TCP for Zeebe gRPC
+    - port:
+        name: zeebe-grpc
+        protocol: TCP
+        number: 26500
+      hosts:
+        - "*"
