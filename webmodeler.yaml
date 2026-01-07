@@ -1,0 +1,14 @@
+identity:
+  enabled: true
+
+webModeler:
+  enabled: true
+
+  # Use the bundled Postgres DB for dev (simple option)
+  postgresql:
+    enabled: true
+
+  # Web Modeler *requires* an SMTP from-address, even in dev
+  restapi:
+    mail:
+      fromAddress: "noreply@example.com"
