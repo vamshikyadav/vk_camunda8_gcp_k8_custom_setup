@@ -1,0 +1,56 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: camunda-virtualservice
+  namespace: camunda
+spec:
+  hosts:
+    - camunda.example.com
+  gateways:
+    - camunda-gateway
+  http:
+    # Operate UI
+    - match:
+        - uri:
+            prefix: /operate
+      route:
+        - destination:
+            host: camunda-platform-icsaas-alpha-us-zeebe-gateway.camunda.svc.cluster.local
+            port:
+              number: 8080
+
+    # Tasklist UI
+    - match:
+        - uri:
+            prefix: /tasklist
+      route:
+        - destination:
+            host: camunda-platform-icsaas-alpha-us-zeebe-gateway.camunda.svc.cluster.local
+            port:
+              number: 8080
+
+    # Optional: Zeebe REST API (if you want /v2/... etc)
+    - match:
+        - uri:
+            prefix: /v2
+      route:
+        - destination:
+            host: camunda-platform-icsaas-alpha-us-zeebe-gateway.camunda.svc.cluster.local
+            port:
+              number: 8080
+
+    # Optional: redirect / -> /operate
+    - match:
+        - uri:
+            exact: /
+      redirect:
+        uri: /operate
+
+  tcp:
+    - match:
+        - port: 26500
+      route:
+        - destination:
+            host: camunda-platform-icsaas-alpha-us-zeebe-gateway.camunda.svc.cluster.local
+            port:
+              number: 26500
