@@ -63,3 +63,19 @@ kubectl create secret generic camunda-credentials \
 
 
 https://docs.camunda.io/docs/self-managed/deployment/helm/configure/authentication-and-authorization/external-keycloak/
+
+### setup cloud sql for keyclock
+
+CREATE DATABASE "keycloak";
+CREATE DATABASE "identity";
+CREATE DATABASE "web-modeler";   --> optional, only if you want Web Modeler in Cloud SQL too
+
+CREATE USER camunda_user WITH PASSWORD 'xxxxxxxx';
+GRANT ALL PRIVILEGES ON DATABASE "keycloak" TO camunda_user;
+GRANT ALL PRIVILEGES ON DATABASE "identity" TO camunda_user;
+GRANT ALL PRIVILEGES ON DATABASE "web-modeler" TO camunda_user;
+
+kubectl create secret generic camunda-psql-db \
+  --from-literal=password='xxxxxxx' \
+  -n camunda
+

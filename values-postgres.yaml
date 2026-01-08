@@ -1,0 +1,49 @@
+# Identity still enabled (needed for Web Modeler & OIDC)
+identity:
+  enabled: true
+
+  # Use external DB for Identity itself (recommended)
+  externalDatabase:
+    enabled: true
+    host: "<CLOUD_SQL_IP_OR_HOST>"      # e.g. 10.x.x.x (private IP)
+    port: 5432
+    username: "camunda_user"
+    existingSecret: "camunda-psql-db"
+    existingSecretKey: "password"
+    database: "identity"
+
+# Keycloak subchart, using external DB in Cloud SQL
+identityKeycloak:
+  enabled: true
+
+  externalDatabase:
+    host: "<CLOUD_SQL_IP_OR_HOST>"      # same host as above
+    port: 5432
+    user: "camunda_user"
+    existingSecret: "camunda-psql-db"
+    existingSecretKey: "password"
+    database: "keycloak"
+
+  auth:
+    adminUser: "keycloak_admin"         # whatever admin user you want
+    existingSecret: "camunda-psql-db"   # reuse or use a different secret
+    existingSecretPasswordKey: "password"
+
+  # VERY IMPORTANT: turn off the internal Postgres for Keycloak
+  postgresql:
+    enabled: false
+
+# Optional: Web Modeler also on Cloud SQL (instead of Bitnami Postgres)
+webModelerPostgresql:
+  enabled: false
+
+webModeler:
+  enabled: true
+  restapi:
+    mail:
+      fromAddress: "no-reply@camunda.local"
+    externalDatabase:
+      url: "jdbc:postgresql://<CLOUD_SQL_IP_OR_HOST>:5432/web-modeler"
+      user: "camunda_user"
+      existingSecret: "camunda-psql-db"
+      existingSecretPasswordKey: "password"
