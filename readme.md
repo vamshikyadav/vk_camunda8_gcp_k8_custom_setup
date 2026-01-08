@@ -62,3 +62,4 @@ kubectl create secret generic camunda-credentials \
   -n camunda
 
 
+https://docs.camunda.io/docs/self-managed/deployment/helm/configure/authentication-and-authorization/external-keycloak/
