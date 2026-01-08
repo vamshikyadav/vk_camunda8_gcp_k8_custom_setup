@@ -1,6 +1,16 @@
 identity:
   enabled: true
-
+# configure Keycloak via the new top-level block
+identityKeycloak:
+  enabled: true
+  # example override fields (match the new values.yaml structure)
+  image:
+    repository: quay.io/keycloak/keycloak
+    tag: "latest"
+  postgresql:
+    enabled: true
+  # other Keycloak-specific settings...
+  
 webModeler:
   enabled: true
 
