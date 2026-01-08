@@ -1,0 +1,77 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: camunda-virtualservice
+  namespace: icsaas-alpha
+spec:
+  hosts:
+    - camunda.example.com
+  gateways:
+    - camunda-gateway
+  http:
+    # Operate UI (unified bundle on zeebe-gateway)
+    - match:
+        - uri:
+            prefix: /operate
+      route:
+        - destination:
+            host: camunda-platform-icsaas-alpha-us-zeebe-gateway.icsaas-alpha.svc.cluster.local
+            port:
+              number: 8080
+
+    # Tasklist UI (same unified endpoint)
+    - match:
+        - uri:
+            prefix: /tasklist
+      route:
+        - destination:
+            host: camunda-platform-icsaas-alpha-us-zeebe-gateway.icsaas-alpha.svc.cluster.local
+            port:
+              number: 8080
+
+    # Identity (management identity service)
+    - match:
+        - uri:
+            prefix: /identity
+      route:
+        - destination:
+            host: camunda-platform-icsaas-alpha-us-identity.icsaas-alpha.svc.cluster.local
+            port:
+              number: 8080
+
+    # Web Modeler UI
+    - match:
+        - uri:
+            prefix: /modeler
+      route:
+        - destination:
+            host: camunda-platform-icsaas-alpha-us-web-modeler-webapp.icsaas-alpha.svc.cluster.local
+            port:
+              number: 80
+
+    # Optional: Orchestration REST API (if you call it directly, e.g. /v2/...)
+    - match:
+        - uri:
+            prefix: /v2
+      route:
+        - destination:
+            host: camunda-platform-icsaas-alpha-us-zeebe-gateway.icsaas-alpha.svc.cluster.local
+            port:
+              number: 8080
+
+    # Optional: root redirect to Operate
+    - match:
+        - uri:
+            exact: /
+      redirect:
+        uri: /operate
+
+  tcp:
+    # Zeebe gRPC
+    - match:
+        - port: 26500
+      route:
+        - destination:
+            host: camunda-platform-icsaas-alpha-us-zeebe-gateway.icsaas-alpha.svc.cluster.local
+            port:
+              number: 26500
