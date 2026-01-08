@@ -44,3 +44,21 @@ http://camunda.example.com/tasklist
 
 
 ZEEBE_ADDRESS=camunda.example.com:26500 for workers
+
+## identity clock setup 
+
+Camunda 8 Helm docs describe for the internal Keycloak + Web Modeler
+
+create the camunda-credentials secret, update same namespace as your Camunda release
+
+kubectl create secret generic camunda-credentials \
+  --from-literal=identity-keycloak-admin-password='xxxxx' \
+  --from-literal=identity-firstuser-password='xxxxx' \
+  --from-literal=identity-connectors-client-token='changeme-connectors' \
+  --from-literal=identity-optimize-client-token='changeme-optimize' \
+  --from-literal=identity-orchestration-client-token='changeme-orchestration' \
+  --from-literal=webmodeler-postgresql-admin-password='xxxxxxx' \
+  --from-literal=webmodeler-postgresql-user-password='xxxxxxx' \
+  -n camunda
+
+
