@@ -1,0 +1,86 @@
+# --- Orchestration cluster (Zeebe / Operate / Tasklist) ---
+orchestration:
+  enabled: true
+  security:
+    authentication:
+      method: basic   # keep cluster simple for dev
+
+zeebe:
+  clusterSize: 1
+  partitionCount: 1
+  replicationFactor: 1
+  pvcSize: 10Gi
+
+# --- Management Identity (for Web Modeler / Console / Optimize) ---
+identity:
+  enabled: true
+
+  externalDatabase:
+    enabled: true
+    host: <YOUR_DB_HOST>          # e.g. 10.124.x.x or Cloud SQL IP
+    port: 5432
+    username: camunda_user
+    database: identity_db
+    secret:
+      existingSecret: camunda-db-password
+      existingSecretKey: db-password
+
+  firstUser:
+    username: demo
+    email: demo@example.com
+    secret:
+      existingSecret: camunda-credentials
+      existingSecretKey: identity-firstuser-password
+
+# --- Keycloak managed by the chart, with external DB ---
+identityKeycloak:
+  enabled: true
+
+  externalDatabase:
+    enabled: true
+    host: <YOUR_DB_HOST>
+    port: 5432
+    user: camunda_user
+    database: keycloak_db
+    secret:
+      existingSecret: camunda-db-password
+      existingSecretKey: db-password
+
+  auth:
+    adminUser: keycloak_admin
+    existingSecret: camunda-credentials
+    passwordSecretKey: identity-keycloak-admin-password
+
+# --- Global identity wiring so Management Identity knows how to talk to Keycloak ---
+global:
+  identity:
+    auth:
+      enabled: true
+
+      # URLs as seen from the browser (public) and from within the cluster (backend)
+      publicIssuerUrl:  http://<INGRESS_OR_NODE_IP>/auth/realms/camunda-platform
+      issuerBackendUrl: http://camunda-identity-keycloak.<namespace>.svc.cluster.local:8080/auth/realms/camunda-platform
+      authUrl:          http://<INGRESS_OR_NODE_IP>/auth/realms/camunda-platform/protocol/openid-connect/auth
+      tokenUrl:         http://camunda-identity-keycloak.<namespace>.svc.cluster.local:8080/auth/realms/camunda-platform/protocol/openid-connect/token
+      jwksUrl:          http://camunda-identity-keycloak.<namespace>.svc.cluster.local:8080/auth/realms/camunda-platform/protocol/openid-connect/certs
+
+      # These are defaults created by Management Identity in Keycloak
+      identity:
+        clientId: camunda-identity
+      console:
+        clientId: camunda-console
+      webModeler:
+        clientId: camunda-web-modeler
+      optimize:
+        clientId: camunda-optimize
+
+# --- Web Modeler with external DB ---
+webModeler:
+  enabled: true
+
+  externalDatabase:
+    url: jdbc:postgresql://<YOUR_DB_HOST>:5432/webmodeler_db
+    user: camunda_user
+    secret:
+      existingSecret: camunda-db-password
+      existingSecretKey: db-password

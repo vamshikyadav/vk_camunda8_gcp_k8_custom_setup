@@ -79,3 +79,24 @@ kubectl create secret generic camunda-psql-db \
   --from-literal=password='xxxxxxx' \
   -n camunda
 
+kubectl create secret generic camunda-credentials \
+  --from-literal=identity-keycloak-admin-password=<KEYCLOAK_ADMIN_PW> \
+  --from-literal=identity-firstuser-password=<FIRST_USER_PW> \
+  --from-literal=identity-connectors-client-token=<CONNECTORS_CLIENT_SECRET> \
+  --from-literal=identity-optimize-client-token=<OPTIMIZE_CLIENT_SECRET> \
+  --from-literal=identity-orchestration-client-token=<ORCHESTRATION_CLIENT_SECRET>
+
+kubectl create secret generic camunda-credentials \
+  --from-literal=identity-keycloak-admin-password='xxxxx' \
+  --from-literal=identity-firstuser-password='xxxxx' \
+  --from-literal=identity-connectors-client-token='changeme-connectors' \
+  --from-literal=identity-optimize-client-token='changeme-optimize' \
+  --from-literal=identity-orchestration-client-token='changeme-orchestration' \
+  --from-literal=webmodeler-postgresql-admin-password='xxxxxxx' \
+  --from-literal=webmodeler-postgresql-user-password='xxxxxxx' \
+  -n camunda
+
+kubectl create secret generic camunda-credentials \
+  -n <namespace> \
+  --from-literal=identity-keycloak-admin-password='admin123' \
+  --from-literal=identity-firstuser-password='demo'
