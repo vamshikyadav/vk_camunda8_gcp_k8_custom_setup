@@ -1,40 +1,47 @@
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: camunda-virtualservice
+  name: camunda-vs
   namespace: camunda
 spec:
   hosts:
-    - camunda.example.com
+    - camunda-dev.example.com        # <-- change to your domain
   gateways:
     - camunda-gateway
   http:
-    # Route /operate -> Operate UI
+    # -------------------------------------------------------
+    # 1. Keycloak (OIDC)
+    # Everything under /auth goes to identity-keycloak
+    # -------------------------------------------------------
     - match:
         - uri:
-            prefix: /operate
+            prefix: /auth
       route:
         - destination:
-            host: camunda-platform-operate.camunda.svc.cluster.local
+            host: camunda-identity-keycloak.camunda.svc.cluster.local
             port:
-              number: 80
+              number: 8080
 
-    # Route /tasklist -> Tasklist UI
+    # -------------------------------------------------------
+    # 2. Management Identity (used by Web Modeler for login)
+    # -------------------------------------------------------
     - match:
         - uri:
-            prefix: /tasklist
+            prefix: /identity
       route:
         - destination:
-            host: camunda-platform-tasklist.camunda.svc.cluster.local
+            host: camunda-identity.camunda.svc.cluster.local
             port:
-              number: 80
+              number: 8080
 
-  tcp:
-    # Route gRPC traffic on port 26500 -> Zeebe Gateway
+    # -------------------------------------------------------
+    # 3. Web Modeler (UI + backend API)
+    # -------------------------------------------------------
     - match:
-        - port: 26500
+        - uri:
+            prefix: /modeler
       route:
         - destination:
-            host: camunda-platform-zeebe-gateway.camunda.svc.cluster.local
+            host: camunda-web-modeler.camunda.svc.cluster.local
             port:
-              number: 26500
+              number: 80  # or 8080 depending on service
