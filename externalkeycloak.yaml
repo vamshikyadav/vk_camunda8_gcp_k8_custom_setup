@@ -1,0 +1,90 @@
+# =====================
+# GLOBAL SETTINGS
+# =====================
+global:
+  # Identity authentication configuration to point to external Keycloak
+  identity:
+    auth:
+      enabled: true
+      # The issuer URL of your external Keycloak realm
+      publicIssuerUrl: "https://keycloak.example.com/auth/realms/camunda-platform"
+
+      # Redirect URLs for each Camunda component that requires login
+      console:
+        redirectUrl: "https://camunda.example.com/console"
+      optimize:
+        redirectUrl: "https://camunda.example.com/optimize"
+      webModeler:
+        redirectUrl: "https://camunda.example.com/modeler"
+
+  # Point the Helm ingress to use your external Keycloak if needed
+  # (optional: only if you expose Keycloak)
+  # keycloak:
+  #   url:
+  #     protocol: "https"
+  #     host: "keycloak.example.com"
+  #     port: "443"
+
+# =====================
+# MANAGEMENT IDENTITY
+# =====================
+identity:
+  # Disable internal Keycloak deployment
+  keycloak:
+    enabled: false
+
+  # Enable Management Identity which registers the OIDC clients in Keycloak
+  enabled: true
+
+  # Administrative setup for Management Identity against external Keycloak
+  auth:
+    admin:
+      # Administrative credentials for Keycloak (so Management Identity can create/setup realm & clients)
+      keycloakAdminUser: "admin"
+      keycloakAdminPassword:
+        existingSecret: "keycloak-admin-secret"
+        existingSecretKey: "password"
+
+  # Optional override of realm name (if Keycloak realm is something other than default)
+  realm: "camunda-platform"
+  client:
+    id: "camunda-identity"
+    secret:
+      existingSecret: "identity-client-secret"
+      existingSecretKey: "secret"
+
+# =====================
+# COMPONENTS AUTH (OPERATE / OPTIMIZE / TASKLIST / CONSOLE, ETC.)
+# =====================
+console:
+  ingress:
+    enabled: true
+  security:
+    authentication:
+      oidc:
+        # this instructs the console to use the external IdP
+        clientId: "console-client"
+        clientSecret:
+          existingSecret: "console-client-secret"
+          existingSecretKey: "secret"
+        issuerUrl: "https://keycloak.example.com/auth/realms/camunda-platform"
+
+optimize:
+  security:
+    authentication:
+      oidc:
+        clientId: "optimize-client"
+        clientSecret:
+          existingSecret: "optimize-client-secret"
+          existingSecretKey: "secret"
+        issuerUrl: "https://keycloak.example.com/auth/realms/camunda-platform"
+
+webModeler:
+  security:
+    authentication:
+      oidc:
+        clientId: "webmodeler-client"
+        clientSecret:
+          existingSecret: "webmodeler-client-secret"
+          existingSecretKey: "secret"
+        issuerUrl: "https://keycloak.example.com/auth/realms/camunda-platform"
