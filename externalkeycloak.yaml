@@ -88,3 +88,26 @@ webModeler:
           existingSecret: "webmodeler-client-secret"
           existingSecretKey: "secret"
         issuerUrl: "https://keycloak.example.com/auth/realms/camunda-platform"
+---
+
+global:
+  identity:
+    auth:
+      enabled: true
+
+      # what Keycloak advertises as issuer MUST match this exactly
+      publicIssuerUrl: "http://<include-endpoint>:8080/realms/camunda-platform"
+
+      # strongly recommended when public/internal differ, but safe even if same
+      issuerBackendUrl: "http://<include-endpoint>:8080/realms/camunda-platform"
+      tokenUrl: "http://<include-endpoint>:8080/realms/camunda-platform/protocol/openid-connect/token"
+      jwksUrl: "http://<include-endpoint>:8080/realms/camunda-platform/protocol/openid-connect/certs"
+
+  identity:
+    keycloak:
+      url:
+        protocol: "http"
+        host: "<include-endpoint>"
+        port: "8080"
+      contextPath: "/"                 # IMPORTANT (not /auth)
+      realm: "/realms/camunda-platform" # IMPORTANT (not admin/master)
