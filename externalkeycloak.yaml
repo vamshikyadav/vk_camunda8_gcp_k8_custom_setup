@@ -111,3 +111,12 @@ global:
         port: "8080"
       contextPath: "/"                 # IMPORTANT (not /auth)
       realm: "/realms/camunda-platform" # IMPORTANT (not admin/master)
+---
+
+auth:
+  enabled: true
+  publicIssuerUrl: "http://<include-endpoint>:8080/realms/camunda-platform"
+  issuerBackendUrl: "http://<include-endpoint>:8080/realms/camunda-platform"
+  authUrl: "http://<include-endpoint>:8080/realms/camunda-platform/protocol/openid-connect/auth"
+  tokenUrl: "http://<include-endpoint>:8080/realms/camunda-platform/protocol/openid-connect/token"
+  jwksUrl: "http://<include-endpoint>:8080/realms/camunda-platform/protocol/openid-connect/certs"
