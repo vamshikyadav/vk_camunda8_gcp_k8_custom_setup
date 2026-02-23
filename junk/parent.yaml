@@ -1,0 +1,41 @@
+name: Deploy Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-dev:
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      environment: dev
+      service_name: ingestion-service
+    secrets:
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+
+  deploy-prod:
+    needs: deploy-dev
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      environment: prod
+      service_name: ingestion-service
+    secrets:
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+
+---
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      environment: dev
+      service_name: api
+    secrets:
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+
+  notify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deployed image ${{ needs.deploy.outputs.image_tag }}"
