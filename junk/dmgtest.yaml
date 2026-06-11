@@ -1,0 +1,43 @@
+- name: Generate and Use a Local Code-Signing Certificate
+        run: |
+          # Locate the app output folder and the exe inside it
+          $AppDir = Get-ChildItem -Path out -Directory -Filter "*win32-x64" | Select-Object -First 1
+          $ExeFile = Get-ChildItem -Path $AppDir.FullName -Filter *.exe | Select-Object -First 1
+          if (-not $ExeFile) {
+            Write-Error "Could not locate a compiled application executable to sign!"
+            exit 1
+          }
+          Write-Host "Target file isolated: $($ExeFile.FullName)"
+
+          Write-Host "Creating a temporary local Code Signing certificate..."
+          $LocalCert = New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=GlobalAnalyticsAgentic" -CertStoreLocation "Cert:\CurrentUser\My"
+
+          Write-Host "Applying digital code signature..."
+          Set-AuthenticodeSignature -FilePath "$($ExeFile.FullName)" -Certificate $LocalCert -TimestampServer "http://timestamp.digicert.com"
+
+          Write-Host "Signing stage successfully completed using local development cert!"
+
+          Write-Host "Compressing app folder for distribution..."
+          $ZipPath = "out\$($AppDir.Name).zip"
+          Compress-Archive -Path "$($AppDir.FullName)\*" -DestinationPath $ZipPath -Force
+          Write-Host "Created package: $ZipPath"
+
+      - name: Upload EXE to Nexus
+        env:
+          NEXUS_USER: ${{ secrets.ACTION_NRM_USER }}
+          NEXUS_PASSWORD: ${{ secrets.ACTION_NRM_PASS }}
+          NEXUS_BASE_URL: 'https://nexus.ashimedia.com/repository/cse-ifs-maven2-releases'
+          GROUP_ID: 'DFDS_ICGlobal_Automation_TestResults'
+          ARTIFACT_ID: 'vfx-Agentic-Studio-windows'
+          VERSION: '1.0.${{ github.run_number }}'
+        run: |
+          $GroupPath = $env:GROUP_ID.Replace('.', '/')
+          $FileName = "${env:ARTIFACT_ID}-${env:VERSION}.zip"
+
+          $UploadUrl = "${env:NEXUS_BASE_URL}/$GroupPath/${env:ARTIFACT_ID}/${env:VERSION}/$FileName"
+          Write-Host "Uploading to Nexus: $UploadUrl"
+
+          $ZipFile = Get-ChildItem -Path out -Filter *.zip -Recurse | Select-Object -First 1
+          echo $ZipFile
+
+          curl -v -k -u "${env:NEXUS_USER}:${env:NEXUS_PASSWORD}" --ssl-no-revoke --upload-file "$($ZipFile.FullName)" "$UploadUrl"
