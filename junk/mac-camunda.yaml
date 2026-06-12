@@ -1,0 +1,43 @@
+- name: Generate and Use a Local Code-Signing Certificate
+        run: |
+          echo "Creating a temporary local Code Signing certificate..."
+          openssl req -x509 -newkey rsa:2048 -keyout /tmp/localcert.key -out /tmp/localcert.crt -days 365 -nodes -subj "/CN=GlobalAnalyticsAgentic"
+          openssl pkcs12 -export -out /tmp/localcert.p12 -inkey /tmp/localcert.key -in /tmp/localcert.crt -passout pass:temppass123
+
+          security create-keychain -p "temppass123" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "temppass123" build.keychain
+          security import /tmp/localcert.p12 -k build.keychain -P "temppass123" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "temppass123" build.keychain
+
+          echo "Applying digital code signature..."
+          codesign --force --deep --sign "GlobalAnalyticsAgentic" "dist/dmg/$APP_NAME"
+
+          echo "Signing stage successfully completed using local development cert!"
+
+          security delete-keychain build.keychain
+
+          echo "Creating DMG..."
+          hdiutil create -volname "EFX Agentic Studio" -srcfolder dist/dmg -ov -format UDZO out/make/EFX-Agentic-Studio.dmg
+
+          # below to check the results
+          ls -lh out/make/
+- name: Upload DMG to Nexus
+        env:
+          NEXUS_USER: ${{ secrets.ACTION_NRM_USER }}
+          NEXUS_PASSWORD: ${{ secrets.ACTION_NRM_PASS }}
+          NEXUS_BASE_URL: 'https://nrm.us.equifax.com/repository/cse-ifs-maven2-releases'
+          GROUP_ID: 'DFDS_ICGlobal_Automation_TestResults' # this for the testing purpose of the dmg publish only vamshi **
+          ARTIFACT_ID: 'EFX-Agentic-Studio'
+          VERSION: '1.0.${{ github.run_number }}'
+        run: |
+          GROUP_PATH=$(echo $GROUP_ID | tr '.' '/')
+          FILENAME="EFX-Agentic-Studio-${VERSION}.dmg"
+
+          UPLOAD_FULL_URL="${NEXUS_BASE_URL}/${GROUP_PATH}/${ARTIFACT_ID}/${VERSION}/${FILENAME}"
+
+          echo "Uploading to Nexus: $UPLOAD_FULL_URL"
+
+          curl -v -u "${NEXUS_USER}:${NEXUS_PASSWORD}" \
+            --upload-file "out/make/EFX-Agentic-Studio.dmg" \
+            "$UPLOAD_FULL_URL"
