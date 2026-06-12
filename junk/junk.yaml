@@ -1,0 +1,35 @@
+- name: Generate and Use a Local Code-Signing Certificate
+        run: |
+          echo "Creating a temporary local Code Signing certificate..."
+
+          # Fix: avoid relying on a Homebrew openssl.cnf that may not exist on this runner
+          cat > /tmp/openssl.cnf << 'EOF'
+          [req]
+          distinguished_name = req_distinguished_name
+          prompt = no
+          [req_distinguished_name]
+          CN = GlobalAnalyticsAgentic
+          EOF
+          export OPENSSL_CONF=/tmp/openssl.cnf
+
+          openssl req -x509 -newkey rsa:2048 -keyout /tmp/localcert.key -out /tmp/localcert.crt -days 365 -nodes -subj "/CN=GlobalAnalyticsAgentic"
+          openssl pkcs12 -export -out /tmp/localcert.p12 -inkey /tmp/localcert.key -in /tmp/localcert.crt -passout pass:temppass123
+
+          security create-keychain -p "temppass123" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "temppass123" build.keychain
+          security import /tmp/localcert.p12 -k build.keychain -P "temppass123" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "temppass123" build.keychain
+
+          echo "Applying digital code signature..."
+          codesign --force --deep --sign "GlobalAnalyticsAgentic" "dist/dmg/$APP_NAME"
+
+          echo "Signing stage successfully completed using local development cert!"
+
+          security delete-keychain build.keychain
+
+          echo "Creating DMG..."
+          hdiutil create -volname "aml Agentic Studio" -srcfolder dist/dmg -ov -format UDZO out/make/aml-Agentic-Studio.dmg
+
+          # below to check the results
+          ls -lh out/make/
